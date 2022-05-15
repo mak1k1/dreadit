@@ -1,32 +1,21 @@
 import { Request, Response, NextFunction } from 'express'
 import axios, { AxiosResponse } from 'axios'
-
-interface Post {
-  userId: Number
-  id: Number
-  title: String
-  body: String
-}
+import { Post, PostProps } from '../models/post'
+import { User } from '../models/user'
+import { isObjectIdOrHexString, isValidObjectId, Schema, SchemaTypes } from 'mongoose'
 
 const getPosts = async (req: Request, res: Response, next: NextFunction) => {
-  let result: AxiosResponse = await axios.get(
-    `https://jsonplaceholder.typicode.com/posts`
-  )
-  let posts: [Post] = result.data
+  let posts = await Post.find({})
+  console.log(posts)
   return res.status(200).json({
     message: posts,
   })
 }
 
-// getting a single post
 const getPost = async (req: Request, res: Response, next: NextFunction) => {
-  // get the post id from the req
-  let id: string = req.params.id
-  // get the post
-  let result: AxiosResponse = await axios.get(
-    `https://jsonplaceholder.typicode.com/posts/${id}`
-  )
-  let post: Post = result.data
+  const id: string = req.params.id
+
+  const post = await Post.findById(id)
   return res.status(200).json({
     message: post,
   })
@@ -67,23 +56,36 @@ const deletePost = async (req: Request, res: Response, next: NextFunction) => {
   })
 }
 
-// adding a post
 const addPost = async (req: Request, res: Response, next: NextFunction) => {
-  // get the data from req.body
-  let title: string = req.body.title
-  let body: string = req.body.body
-  // add the post
-  let response: AxiosResponse = await axios.post(
-    `https://jsonplaceholder.typicode.com/posts`,
+  const { userId, title, body }: PostProps = req.body
+
+  // if(!isValidObjectId(userId)) {
+  //   return res.status(422).json({
+  //     message: "userId is not valid"
+  //   })
+  // }
+
+  Post.create(
     {
-      title,
-      body,
+      userId: userId,
+      title: title,
+      body: body,
+    },
+    async function (err, post) {
+      if (err) {
+        console.log('Error creating User: ', err)
+        res.status(400).json(err)
+      } else {        
+        const user = await User.findById(userId)
+        if(!user) {
+          return
+        }
+        user.posts.push(post._id)
+        console.log('User Created: ', user)
+        res.status(201).json(user)
+      }
     }
   )
-  // return response
-  return res.status(200).json({
-    message: response.data,
-  })
 }
 
 export default { getPosts, getPost, updatePost, deletePost, addPost }
