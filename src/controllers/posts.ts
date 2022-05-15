@@ -6,7 +6,6 @@ import { isValidObjectId, Schema, SchemaTypes } from 'mongoose'
 
 const getPosts = async (req: Request, res: Response, next: NextFunction) => {
   let posts = await Post.find({})
-  console.log(posts)
   return res.status(200).json({
     message: posts,
   })

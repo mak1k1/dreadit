@@ -1,13 +1,13 @@
 import { Schema, model, Types } from 'mongoose'
 
-interface IUser {
+export interface UserProps {
   name: string
   email: string
   avatar?: string
   posts: Types.ObjectId[]
 }
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<UserProps>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   avatar: String,
@@ -16,4 +16,4 @@ const userSchema = new Schema<IUser>({
   ],
 })
 
-export const User = model<IUser>('User', userSchema)
+export const User = model<UserProps>('User', userSchema)
