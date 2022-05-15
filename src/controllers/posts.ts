@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import axios, { AxiosResponse } from 'axios'
 import { Post, PostProps } from '../models/post'
 import { User } from '../models/user'
-import { isObjectIdOrHexString, isValidObjectId, Schema, SchemaTypes } from 'mongoose'
+import { isValidObjectId, Schema, SchemaTypes } from 'mongoose'
 
 const getPosts = async (req: Request, res: Response, next: NextFunction) => {
   let posts = await Post.find({})
