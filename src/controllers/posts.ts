@@ -24,21 +24,20 @@ const getPost = async (req: Request, res: Response, next: NextFunction) => {
 const updatePost = async (req: Request, res: Response, next: NextFunction) => {
   // get the post id from the req.params
   let id: string = req.params.id
-  // get the data from req.body
-  let title: string = req.body.title ?? null
-  let body: string = req.body.body ?? null
+
+  const updateObj: {[key: string]: string } = req.body
+  
   // update the post
-  let response: AxiosResponse = await axios.put(
-    `https://jsonplaceholder.typicode.com/posts/${id}`,
-    {
-      ...(title && { title }),
-      ...(body && { body }),
+  Post.findByIdAndUpdate(id, updateObj, async (err: NativeError, post: PostProps) => {
+    if(err) {
+      return res.status(400).json({
+        error: err
+      })
     }
-  )
-  // return response
-  return res.status(200).json({
-    message: response.data,
-  })
+    return res.status(200).json({
+      message: await Post.findById(id),
+    })
+  }) 
 }
 
 // deleting a post
@@ -58,12 +57,6 @@ const deletePost = async (req: Request, res: Response, next: NextFunction) => {
 const addPost = async (req: Request, res: Response, next: NextFunction) => {
   const { userId, title, body }: PostProps = req.body
 
-  // if(!isValidObjectId(userId)) {
-  //   return res.status(422).json({
-  //     message: "userId is not valid"
-  //   })
-  // }
-
   Post.create(
     {
       userId: userId,
@@ -80,7 +73,7 @@ const addPost = async (req: Request, res: Response, next: NextFunction) => {
           return
         }
         user.posts.push(post._id)
-        console.log('User Created: ', user)
+        console.log('Post Created: ', post)
         res.status(201).json(user)
       }
     }
