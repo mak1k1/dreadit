@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
-import axios, { AxiosResponse } from 'axios'
 import { Post, PostProps } from '../models/post'
 import { User } from '../models/user'
-import { isValidObjectId, Schema, SchemaTypes } from 'mongoose'
 
 const getPosts = async (req: Request, res: Response, next: NextFunction) => {
   let posts = await Post.find({})
@@ -25,19 +23,23 @@ const updatePost = async (req: Request, res: Response, next: NextFunction) => {
   // get the post id from the req.params
   let id: string = req.params.id
 
-  const updateObj: {[key: string]: string } = req.body
-  
+  const updateObj: { [key: string]: string } = req.body
+
   // update the post
-  Post.findByIdAndUpdate(id, updateObj, async (err: NativeError, post: PostProps) => {
-    if(err) {
-      return res.status(400).json({
-        error: err
+  Post.findByIdAndUpdate(
+    id,
+    updateObj,
+    async (err: NativeError, post: PostProps) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        })
+      }
+      return res.status(200).json({
+        message: await Post.findById(id),
       })
     }
-    return res.status(200).json({
-      message: await Post.findById(id),
-    })
-  }) 
+  )
 }
 
 // deleting a post
@@ -45,12 +47,16 @@ const deletePost = async (req: Request, res: Response, next: NextFunction) => {
   // get the post id from req.params
   let id: string = req.params.id
   // delete the post
-  let response: AxiosResponse = await axios.delete(
-    `https://jsonplaceholder.typicode.com/posts/${id}`
-  )
-  // return response
-  return res.status(200).json({
-    message: 'post deleted successfully',
+  Post.findByIdAndDelete(id, (err: NativeError) => {
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      })
+    }
+
+    return res.status(200).json({
+      message: 'Post deleted successfully',
+    })
   })
 }
 
@@ -67,9 +73,9 @@ const addPost = async (req: Request, res: Response, next: NextFunction) => {
       if (err) {
         console.log('Error creating User: ', err)
         res.status(400).json(err)
-      } else {        
+      } else {
         const user = await User.findById(userId)
-        if(!user) {
+        if (!user) {
           return
         }
         user.posts.push(post._id)
