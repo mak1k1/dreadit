@@ -8,68 +8,77 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const axios_1 = __importDefault(require("axios"));
+const post_1 = require("../models/post");
+const user_1 = require("../models/user");
 const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let result = yield axios_1.default.get(`https://jsonplaceholder.typicode.com/posts`);
-    let posts = result.data;
+    let posts = yield post_1.Post.find({});
     return res.status(200).json({
         message: posts,
     });
 });
-// getting a single post
 const getPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    // get the post id from the req
-    let id = req.params.id;
-    // get the post
-    let result = yield axios_1.default.get(`https://jsonplaceholder.typicode.com/posts/${id}`);
-    let post = result.data;
+    const id = req.params.id;
+    const post = yield post_1.Post.findById(id);
     return res.status(200).json({
         message: post,
     });
 });
 // updating a post
 const updatePost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     // get the post id from the req.params
     let id = req.params.id;
-    // get the data from req.body
-    let title = (_a = req.body.title) !== null && _a !== void 0 ? _a : null;
-    let body = (_b = req.body.body) !== null && _b !== void 0 ? _b : null;
+    const updateObj = req.body;
     // update the post
-    let response = yield axios_1.default.put(`https://jsonplaceholder.typicode.com/posts/${id}`, Object.assign(Object.assign({}, (title && { title })), (body && { body })));
-    // return response
-    return res.status(200).json({
-        message: response.data,
-    });
+    post_1.Post.findByIdAndUpdate(id, updateObj, (err, post) => __awaiter(void 0, void 0, void 0, function* () {
+        if (err) {
+            return res.status(400).json({
+                error: err,
+            });
+        }
+        return res.status(200).json({
+            message: yield post_1.Post.findById(id),
+        });
+    }));
 });
 // deleting a post
 const deletePost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     // get the post id from req.params
     let id = req.params.id;
     // delete the post
-    let response = yield axios_1.default.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
-    // return response
-    return res.status(200).json({
-        message: 'post deleted successfully',
+    post_1.Post.findByIdAndDelete(id, (err) => {
+        if (err) {
+            return res.status(400).json({
+                error: err,
+            });
+        }
+        return res.status(200).json({
+            message: 'Post deleted successfully',
+        });
     });
 });
-// adding a post
 const addPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    // get the data from req.body
-    let title = req.body.title;
-    let body = req.body.body;
-    // add the post
-    let response = yield axios_1.default.post(`https://jsonplaceholder.typicode.com/posts`, {
-        title,
-        body,
-    });
-    // return response
-    return res.status(200).json({
-        message: response.data,
+    const { userId, title, body } = req.body;
+    post_1.Post.create({
+        userId: userId,
+        title: title,
+        body: body,
+    }, function (err, post) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (err) {
+                console.log('Error creating User: ', err);
+                res.status(400).json(err);
+            }
+            else {
+                const user = yield user_1.User.findById(userId);
+                if (!user) {
+                    return;
+                }
+                user.posts.push(post._id);
+                console.log('Post Created: ', post);
+                res.status(201).json(user);
+            }
+        });
     });
 });
 exports.default = { getPosts, getPost, updatePost, deletePost, addPost };

@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
-    "build": "tsc -w"
+    "start:run": "nodemon src/server.ts",
+    "start:build": "tsc -w",
+    "start": "concurrently npm:start:*"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.3",
     "axios": "^0.27.2",
+    "concurrently": "^7.2.1",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "mongoose": "^6.3.3",

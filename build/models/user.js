@@ -6,5 +6,8 @@ const userSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true },
     avatar: String,
+    posts: [
+        { type: mongoose_1.Types.ObjectId, ref: 'Post' }
+    ],
 });
 exports.User = (0, mongoose_1.model)('User', userSchema);
