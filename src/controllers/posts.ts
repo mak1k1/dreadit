@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import { Types } from 'mongoose'
 import { Post, PostProps } from '../models/post'
 import { User } from '../models/user'
 
@@ -11,8 +12,15 @@ const getPosts = async (req: Request, res: Response, next: NextFunction) => {
 
 const getPost = async (req: Request, res: Response, next: NextFunction) => {
   const id: string = req.params.id
+  
+  if(!Types.ObjectId.isValid(id)) {
+    return res.status(404).json({
+      error: 'Post not found'
+    })
+  }
 
   const post = await Post.findById(id)
+
   return res.status(200).json({
     message: post,
   })
