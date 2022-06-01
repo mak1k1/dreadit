@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import { Types } from 'mongoose'
 import { User, UserProps } from '../models/user'
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
@@ -9,6 +10,12 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
 }
 const getUser = async (req: Request, res: Response, next: NextFunction) => {
   const id: string = req.params.id
+
+  if(!Types.ObjectId.isValid(id)) {
+    return res.status(404).json({
+      error: 'User not found'
+    })
+  }
 
   const user = await User.findById(id)
   return res.status(200).json({

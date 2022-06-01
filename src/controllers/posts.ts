@@ -12,7 +12,7 @@ const getPosts = async (req: Request, res: Response, next: NextFunction) => {
 
 const getPost = async (req: Request, res: Response, next: NextFunction) => {
   const id: string = req.params.id
-  
+
   if(!Types.ObjectId.isValid(id)) {
     return res.status(404).json({
       error: 'Post not found'
@@ -30,6 +30,12 @@ const getPost = async (req: Request, res: Response, next: NextFunction) => {
 const updatePost = async (req: Request, res: Response, next: NextFunction) => {
   // get the post id from the req.params
   let id: string = req.params.id
+
+  if(!Types.ObjectId.isValid(id)) {
+    return res.status(404).json({
+      error: 'Post not found'
+    })
+  }
 
   const updateObj: { [key: string]: string } = req.body
 
@@ -54,6 +60,12 @@ const updatePost = async (req: Request, res: Response, next: NextFunction) => {
 const deletePost = async (req: Request, res: Response, next: NextFunction) => {
   // get the post id from req.params
   let id: string = req.params.id
+
+  if(!Types.ObjectId.isValid(id)) {
+    return res.status(404).json({
+      error: 'Post not found'
+    })
+  }
   // delete the post
   Post.findByIdAndDelete(id, (err: NativeError) => {
     if (err) {
